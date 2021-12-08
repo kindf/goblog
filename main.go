@@ -7,17 +7,14 @@ import (
 )
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "text/html; charset=utf-8")
     fmt.Fprintf(w, "<h1>Hello, welcome to goblog</h1>")
 }
 
 func aboutHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "text/html; charset=utf-8")
     fmt.Fprintf(w, "<h1>Here is about page</h1>")
 }
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "text/html; charset=utf-8")
     w.WriteHeader(http.StatusNotFound)
     fmt.Fprintf(w, "<h1>Page not found</h1>")
 }
@@ -36,6 +33,13 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "create article")
 }
 
+func forceHTMLMiddleware(h http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Content-Type", "text/html; charset=utf-8")
+        h.ServeHTTP(w, r)
+    })
+}
+
 func main() {
     router := mux.NewRouter()
 
@@ -47,6 +51,10 @@ func main() {
     router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
 
     router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
+    router.Use(forceHTMLMiddleware)
 
-    http.ListenAndServe(":8080", router)
+    err := http.ListenAndServe(":8080", router)
+    if err != nil {
+        fmt.Println(err)
+    }
 }
