@@ -4,6 +4,9 @@ import (
     "net/http"
     "fmt"
     "strings"
+    "html/template"
+    "unicode/utf8"
+    "net/url"
     "github.com/gorilla/mux"
 )
 
@@ -32,8 +35,75 @@ func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "article list")
 }
 
+// ArticlesFormData 创建博文表单数据
+type ArticlesFormData struct {
+    Title       string
+    Body        string
+    URL         *url.URL
+    Errors      map[string]string
+}
+
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "create article")
+
+    title := r.PostFormValue("title")
+    body := r.PostFormValue("body")
+
+    errors := make(map[string]string)
+
+    if title == "" {
+        errors["title"] = "标题不存在"
+    } else if utf8.RuneCountInString(title) < 3 || utf8.RuneCountInString(title) > 40 {
+        errors["title"] = "标题长度需介于 3-40"
+    }
+
+    if body == "" {
+        errors["body"] = "标题不存在"
+    } else if utf8.RuneCountInString(body) < 10 {
+        errors["body"] = "内容长度需大于等于10个字节"
+    }
+
+    if len(errors) == 0 {
+    } else {
+        html := `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>创建文章 —— 我的技术博客</title>
+    <style type="text/css">.error {color: red;}</style>
+</head>
+<body>
+    <form action="{{ .URL }}" method="post">
+        <p><input type="text" name="title" value="{{ .Title }}"></p>
+        {{ with .Errors.title }}
+        <p class="error">{{ . }}</p>
+        {{ end }}
+        <p><textarea name="body" cols="30" rows="10">{{ .Body }}</textarea></p>
+        {{ with .Errors.body }}
+        <p class="error">{{ . }}</p>
+        {{ end }}
+        <p><button type="submit">提交</button></p>
+    </form>
+</body>
+</html>
+`
+        storeURL, _ := router.Get("articles.store").URL()
+        data := ArticlesFormData {
+            Title: title,
+            Body: body,
+            URL: storeURL,
+            Errors: errors,
+        }
+        tmpl, err := template.New("create-form").Parse(html)
+        if err != nil {
+            panic(err)
+        }
+
+        err = tmpl.Execute(w, data)
+        if err != nil {
+            panic(err)
+        }
+    }
 }
 
 func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
