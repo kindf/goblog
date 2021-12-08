@@ -126,8 +126,33 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+func (a Article) Link() string {
+    showURL, err := router.Get("articles.show").URL("id", strconv.FormatInt(a.ID, 10))
+    if err != nil {
+        checkError(err)
+        return ""
+    }
+    return showURL.String()
+}
+
 func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "article list")
+    rows, err := db.Query("SELECT * from articles")
+    checkError(err)
+    defer rows.Close()
+
+    var articles []Article
+    for rows.Next() {
+        var article Article
+        err := rows.Scan(&article.ID, &article.Title, &article.Body)
+        checkError(err)
+        articles = append(articles, article)
+    }
+    err = rows.Err()
+    checkError(err)
+    tmpl, err := template.ParseFiles("static/index.gohtml")
+    checkError(err)
+    err = tmpl.Execute(w, articles)
+    checkError(err)
 }
 
 // ArticlesFormData 创建博文表单数据
