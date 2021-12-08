@@ -3,13 +3,14 @@ package main
 import (
     "net/http"
     "fmt"
-    "strings"
+    "strings" // 字符串操作
     "html/template"
     "unicode/utf8"
     "net/url"
     "database/sql"
     "log"
     "time"
+    "strconv" // 字符串和其他类型转换
     "github.com/gorilla/mux"
     "github.com/go-sql-driver/mysql"
 )
@@ -104,6 +105,14 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     if len(errors) == 0 {
+        lastInsertId, err := saveArticlesToDB(title, body)
+        if lastInsertId > 0 {
+            fmt.Fprintf(w, "insert succ. ID:"+strconv.FormatInt(lastInsertId, 10))
+        }else {
+            checkError(err)
+            w.WriteHeader(http.StatusInternalServerError)
+            fmt.Fprintf(w, "500 internal error")
+        }
     } else {
         storeURL, _ := router.Get("articles.store").URL()
         data := ArticlesFormData {
@@ -122,6 +131,29 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
             panic(err)
         }
     }
+}
+
+func saveArticlesToDB(title string, body string) (int64, error) {
+    var (
+        id int64
+        err error
+        rs sql.Result
+        stmt *sql.Stmt
+    )
+    stmt, err = db.Prepare("INSERT INTO articles (title, body) VALUES(?,?)")
+    if err != nil {
+        return 0, err
+    }
+    defer stmt.Close()
+    rs, err = stmt.Exec(title, body)
+    if err != nil {
+        return 0, err
+    }
+    if id, err = rs.LastInsertId(); id > 0 {
+        return id, nil
+    }
+
+    return 0, err
 }
 
 func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
