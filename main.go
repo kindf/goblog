@@ -7,10 +7,41 @@ import (
     "html/template"
     "unicode/utf8"
     "net/url"
+    "database/sql"
+    "log"
+    "time"
     "github.com/gorilla/mux"
+    "github.com/go-sql-driver/mysql"
 )
 
- var router = mux.NewRouter()
+var router = mux.NewRouter()
+var db *sql.DB
+
+func checkError(err error){
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+
+func initDB(){
+    var err error
+    config := mysql.Config {
+        User: "root",
+        Passwd: "ljl123456",
+        Addr: "127.0.0.1:3306",
+        Net: "tcp",
+        DBName: "goblog",
+        AllowNativePasswords: true,
+    }
+    db, err = sql.Open("mysql", config.FormatDSN())
+    checkError(err)
+    db.SetMaxOpenConns(25)
+    db.SetMaxIdleConns(25)
+    db.SetConnMaxLifetime(5 * time.Minute)
+
+    err = db.Ping()
+    checkError(err)
+}
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "<h1>Hello, welcome to goblog</h1>")
@@ -118,7 +149,7 @@ func removeTrailingSlash(next http.Handler) http.Handler {
 }
 
 func main() {
-
+    initDB()
     router.HandleFunc("/", homeHandler).Methods("GET").Name("home")
     router.HandleFunc("/about", aboutHandler).Methods("GET").Name("about")
 
