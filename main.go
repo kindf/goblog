@@ -3,15 +3,16 @@ package main
 import (
     "goblog/pkg/route"
     "goblog/pkg/logger"
+    "goblog/pkg/types"
     "net/http"
     "fmt"
     "strings" // 字符串操作
+    "strconv" // 字符串和其他类型转换
     "html/template"
     "unicode/utf8"
     "net/url"
     "database/sql"
     "time"
-    "strconv" // 字符串和其他类型转换
     "github.com/gorilla/mux"
     "github.com/go-sql-driver/mysql"
 )
@@ -95,10 +96,6 @@ type Article struct {
     ID int64
 }
 
-func Int64ToString(num int64) string {
-    return strconv.FormatInt(num, 10)
-}
-
 func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
     id := route.GetRouteVariable("id", r)
     article, err := getArticleByID(id)
@@ -113,7 +110,7 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
             fmt.Fprintf(w, "500 internal error")
         }
     } else {
-        tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{"RouteName2URL":route.RouteName2URL, "Int64ToString":Int64ToString,}).ParseFiles("static/show.gohtml")
+        tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{"RouteName2URL":route.RouteName2URL, "Int64ToString":types.Int64ToString,}).ParseFiles("static/show.gohtml")
         logger.LogError(err)
         err = tmpl.Execute(w, article)
         logger.LogError(err)
