@@ -3,12 +3,14 @@ package route
 import (
     "github.com/gorilla/mux"
     "net/http"
+    "goblog/pkg/routes"
 )
 
 var Router *mux.Router
 
 func Initialize() {
     Router = mux.NewRouter()
+    routes.RegisterWebRoutes(Router)
 }
 
 func RouteName2URL(routeName string, pairs ...string) string {
