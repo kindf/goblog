@@ -8,22 +8,15 @@ import (
     "fmt"
     "goblog/pkg/types"
     "goblog/pkg/route"
+    "goblog/app/models/article"
 )
 
 type ArticlesController struct {
 }
 
-func getArticleByID(id string) (int, error) {
-    if id == "todo" {
-        return 1, sql.ErrNoRows
-    }
-    return 2, sql.ErrNoRows
-}
-
 func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
     id := route.GetRouteVariable("id", r)
-    // TODO:
-    article, err := getArticleByID(id)
+    article, err := article.Get(id)
 
     if err != nil {
         if err == sql.ErrNoRows {
@@ -35,7 +28,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
             fmt.Fprintf(w, "500 internal error")
         }
     } else {
-        tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{"RouteName2URL":route.RouteName2URL, "Int64ToString":types.Int64ToString,}).ParseFiles("static/show.gohtml")
+        tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{"RouteName2URL":route.RouteName2URL, "Uint64ToString":types.Uint64ToString,}).ParseFiles("static/show.gohtml")
         logger.LogError(err)
         err = tmpl.Execute(w, article)
         logger.LogError(err)
