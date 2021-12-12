@@ -305,6 +305,7 @@ func removeTrailingSlash(next http.Handler) http.Handler {
 func main() {
     database.Initialize()
     db = database.DB
+    bootstrap.SetupDB()
     router = bootstrap.SetupRoute()
 
     router.HandleFunc("/articles/{id:[0-9]+}/edit", articlesEditHandler).Methods("GET").Name("articles.edit")
