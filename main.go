@@ -1,10 +1,9 @@
 package main
 
 import (
-    "goblog/pkg/route"
     "goblog/pkg/logger"
-    "goblog/pkg/types"
     "goblog/pkg/database"
+    "goblog/bootstrap"
     "net/http"
     "fmt"
     "strings" // 字符串操作
@@ -49,27 +48,6 @@ type Article struct {
     Title string
     Body string
     ID int64
-}
-
-func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
-    id := route.GetRouteVariable("id", r)
-    article, err := getArticleByID(id)
-
-    if err != nil {
-        if err == sql.ErrNoRows {
-            w.WriteHeader(http.StatusNotFound)
-            fmt.Fprintf(w, "404 article not found")
-        } else {
-            logger.LogError(err)
-            w.WriteHeader(http.StatusInternalServerError)
-            fmt.Fprintf(w, "500 internal error")
-        }
-    } else {
-        tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{"RouteName2URL":route.RouteName2URL, "Int64ToString":types.Int64ToString,}).ParseFiles("static/show.gohtml")
-        logger.LogError(err)
-        err = tmpl.Execute(w, article)
-        logger.LogError(err)
-    }
 }
 
 func (a Article) Link() string {
@@ -184,8 +162,13 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+func getRouteVariable(param string, r *http.Request) string {
+    vars := mux.Vars(r)
+    return vars[param]
+}
+
 func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
-    id := route.GetRouteVariable("id", r)
+    id := getRouteVariable("id", r)
     article, err := getArticleByID(id)
 
     if err != nil {
@@ -213,7 +196,7 @@ func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
-    id := route.GetRouteVariable("id", r)
+    id := getRouteVariable("id", r)
     _, err := getArticleByID(id)
     if err != nil {
         if err == sql.ErrNoRows {
@@ -281,7 +264,7 @@ func (a Article) Delete() (RowsAffected int64, err error) {
 }
 
 func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
-    id := route.GetRouteVariable("id", r)
+    id := getRouteVariable("id", r)
     article, err := getArticleByID(id)
     if err != nil {
         if err == sql.ErrNoRows {
@@ -322,10 +305,8 @@ func removeTrailingSlash(next http.Handler) http.Handler {
 func main() {
     database.Initialize()
     db = database.DB
-    route.Initialize()
-    router = route.Router
+    router = bootstrap.SetupRoute()
 
-    router.HandleFunc("/articles/{id:[0-9]+}", articlesShowHandler).Methods("GET").Name("articles.show")
     router.HandleFunc("/articles/{id:[0-9]+}/edit", articlesEditHandler).Methods("GET").Name("articles.edit")
     router.HandleFunc("/articles/{id:[0-9]+}", articlesUpdateHandler).Methods("POST").Name("articles.update")
     router.HandleFunc("/articles/{id:[0-9]+}/delete", articlesDeleteHandler).Methods("POST").Name("articles.delete")

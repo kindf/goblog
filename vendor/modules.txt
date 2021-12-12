@@ -4,3 +4,7 @@ github.com/go-sql-driver/mysql
 # github.com/gorilla/mux v1.8.0
 ## explicit
 github.com/gorilla/mux
+# github.com/jinzhu/now v1.1.4
+## explicit
+# gorm.io/gorm v1.22.4
+## explicit
