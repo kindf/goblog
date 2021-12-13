@@ -28,11 +28,25 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
             fmt.Fprintf(w, "500 internal error")
         }
     } else {
-        tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{"RouteName2URL":route.RouteName2URL, "Uint64ToString":types.Uint64ToString,}).ParseFiles("static/show.gohtml")
+        tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{"RouteName2URL":route.Name2URL, "Uint64ToString":types.Uint64ToString,}).ParseFiles("static/show.gohtml")
         logger.LogError(err)
         err = tmpl.Execute(w, article)
         logger.LogError(err)
     }
 }
 
+func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
+    articles, err := article.GetAll()
+    
+    if err != nil {
+        logger.LogError(err)
+        w.WriteHeader(http.StatusInternalServerError)
+        fmt.Fprintf(w, "500 服务器内部错误")
+    } else {
+        tmpl, err := template.ParseFiles("static/index.gohtml")
+        logger.LogError(err)
+        err = tmpl.Execute(w, articles)
+        logger.LogError(err)
+    }
+}
 
