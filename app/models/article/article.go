@@ -2,6 +2,7 @@ package article
 
 import (
     "goblog/pkg/route"
+    "goblog/pkg/types"
 )
 
 type Article struct {
@@ -11,9 +12,5 @@ type Article struct {
 }
 
 func (article Article) Link() string {
-    return route.Name2URL("articles.show", "id", article.GetStringID())
-}
-
-func (article Article) GetStringID() string {
-    return "1"
+    return route.Name2URL("articles.show", "id", types.Uint64ToString(article.ID))
 }

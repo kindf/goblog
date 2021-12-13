@@ -3,7 +3,6 @@ package controllers
 import (
     "net/http"
     "html/template"
-    "database/sql"
     "fmt"
     "unicode/utf8"
     "strconv" // 字符串和其他类型转换
@@ -29,7 +28,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
     article, err := article.Get(id)
 
     if err != nil {
-        if err == sql.ErrNoRows {
+        if err == gorm.ErrRecordNotFound {
             w.WriteHeader(http.StatusNotFound)
             fmt.Fprintf(w, "404 article not found")
         } else {
@@ -204,6 +203,36 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 
             err = tmpl.Execute(w, data)
             logger.LogError(err)
+        }
+    }
+}
+
+func (*ArticlesController) Delete(w http.ResponseWriter, r *http.Request) {
+    id := route.GetRouteVariable("id", r)
+    _article, err := article.Get(id)
+    if err != nil {
+        if err == gorm.ErrRecordNotFound {
+            w.WriteHeader(http.StatusNotFound)
+            fmt.Fprintf(w, "404 文章未找到")
+        } else {
+            logger.LogError(err)
+            w.WriteHeader(http.StatusInternalServerError)
+            fmt.Fprintf(w, "500 服务器内部错误")
+        }
+    } else {
+        rowsAffected, err := _article.Delete()
+        if err != nil {
+            logger.LogError(err)
+            w.WriteHeader(http.StatusInternalServerError)
+            fmt.Fprintf(w, "500 服务器内部错误")
+        } else {
+            if rowsAffected > 0 {
+                indexURL := route.Name2URL("articles.index")
+                http.Redirect(w, r, indexURL, http.StatusFound)
+            } else {
+                w.WriteHeader(http.StatusNotFound)
+                fmt.Fprintf(w, "404 文章未找到")
+            }
         }
     }
 }

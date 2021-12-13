@@ -24,7 +24,7 @@ func GetAll() ([]Article, error) {
     return articles, nil
 }
 
-func (article *Article)Create() (err error) {
+func (article *Article) Create() (err error) {
     if err = model.DB.Create(&article).Error; err != nil {
         logger.LogError(err)
         return err
@@ -32,11 +32,21 @@ func (article *Article)Create() (err error) {
     return nil
 }
 
-func (article *Article)Update() (rowsAffected int64, err error) {
+func (article *Article) Update() (rowsAffected int64, err error) {
     result := model.DB.Save(&article)
     if err = result.Error; err != nil {
         logger.LogError(err)
         return 0, err
     }
+    return result.RowsAffected, nil
+}
+
+func (article *Article) Delete() (rowsAffected int64, err error) {
+    result := model.DB.Delete(&article)
+    if err = result.Error; err != nil {
+        logger.LogError(err)
+        return 0, err
+    }
+
     return result.RowsAffected, nil
 }
