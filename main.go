@@ -78,81 +78,6 @@ type ArticlesFormData struct {
     Errors      map[string]string
 }
 
-func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
-    title := r.PostFormValue("title")
-    body := r.PostFormValue("body")
-    errors := validateArticleFormData(title, body)
-    if len(errors) == 0 {
-        lastInsertId, err := saveArticlesToDB(title, body)
-        if lastInsertId > 0 {
-            fmt.Fprintf(w, "insert succ. ID:"+strconv.FormatInt(lastInsertId, 10))
-        }else {
-            logger.LogError(err)
-            w.WriteHeader(http.StatusInternalServerError)
-            fmt.Fprintf(w, "500 internal error")
-        }
-    } else {
-        storeURL, _ := router.Get("articles.store").URL()
-        data := ArticlesFormData {
-            Title: title,
-            Body: body,
-            URL: storeURL,
-            Errors: errors,
-        }
-        tmpl, err := template.ParseFiles("static/create.gohtml")
-        if err != nil {
-            panic(err)
-        }
-
-        err = tmpl.Execute(w, data)
-        if err != nil {
-            panic(err)
-        }
-    }
-}
-
-func saveArticlesToDB(title string, body string) (int64, error) {
-    var (
-        id int64
-        err error
-        rs sql.Result
-        stmt *sql.Stmt
-    )
-    stmt, err = db.Prepare("INSERT INTO articles (title, body) VALUES(?,?)")
-    if err != nil {
-        return 0, err
-    }
-    defer stmt.Close()
-    rs, err = stmt.Exec(title, body)
-    if err != nil {
-        return 0, err
-    }
-    if id, err = rs.LastInsertId(); id > 0 {
-        return id, nil
-    }
-
-    return 0, err
-}
-
-func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
-    storeURL, _ := router.Get("articles.store").URL()
-    data := ArticlesFormData{
-        Title: "",
-        Body: "",
-        URL: storeURL,
-        Errors: nil,
-    }
-
-    tmpl, err := template.ParseFiles("static/create.gohtml")
-    if err != nil {
-        panic(err)
-    }
-    err = tmpl.Execute(w, data)
-    if err != nil {
-        panic(err)
-    }
-}
-
 func getRouteVariable(param string, r *http.Request) string {
     vars := mux.Vars(r)
     return vars[param]
@@ -302,8 +227,6 @@ func main() {
     router.HandleFunc("/articles/{id:[0-9]+}/edit", articlesEditHandler).Methods("GET").Name("articles.edit")
     router.HandleFunc("/articles/{id:[0-9]+}", articlesUpdateHandler).Methods("POST").Name("articles.update")
     router.HandleFunc("/articles/{id:[0-9]+}/delete", articlesDeleteHandler).Methods("POST").Name("articles.delete")
-    router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
-    router.HandleFunc("/articles/create", articlesCreateHandler).Methods("GET").Name("articles.create")
 
     router.Use(forceHTMLMiddleware)
 
