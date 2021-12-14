@@ -8,10 +8,10 @@ import (
     "strconv" // 字符串和其他类型转换
     //"path/filepath"
     "gorm.io/gorm"
-    "goblog/pkg/types"
     "goblog/pkg/route"
     "goblog/app/models/article"
     "goblog/pkg/logger"
+    "goblog/pkg/view"
 )
 
 type ArticlesController struct {
@@ -38,11 +38,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
             fmt.Fprintf(w, "500 internal error")
         }
     } else {
-        logger.LogError(err)
-        files := []string{"./static/show.gohtml", "./static/app.gohtml", "./static/sidebar.gohtml"}
-        tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{"RouteName2URL":route.Name2URL, "Uint64ToString":types.Uint64ToString,}).ParseFiles(files...)
-        err = tmpl.ExecuteTemplate(w, "app", article)
-        logger.LogError(err)
+        view.Render(w, "show", article)
     }
 }
 
@@ -54,11 +50,7 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusInternalServerError)
         fmt.Fprintf(w, "500 服务器内部错误")
     } else {
-        files := []string{"./static/app.gohtml", "./static/index.gohtml", "./static/sidebar.gohtml"}
-        tmpl, err := template.ParseFiles(files...)
-        logger.LogError(err)
-        err = tmpl.ExecuteTemplate(w, "app", articles)
-        logger.LogError(err)
+        view.Render(w, "index", articles)
     }
 }
 func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
