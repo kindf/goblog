@@ -6,6 +6,7 @@ import (
     "fmt"
     "unicode/utf8"
     "strconv" // 字符串和其他类型转换
+    //"path/filepath"
     "gorm.io/gorm"
     "goblog/pkg/types"
     "goblog/pkg/route"
@@ -52,9 +53,10 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusInternalServerError)
         fmt.Fprintf(w, "500 服务器内部错误")
     } else {
-        tmpl, err := template.ParseFiles("static/index.gohtml")
+        files := []string{"./static/app.gohtml", "./static/index.gohtml", "./static/sidebar.gohtml"}
+        tmpl, err := template.ParseFiles(files...)
         logger.LogError(err)
-        err = tmpl.Execute(w, articles)
+        err = tmpl.ExecuteTemplate(w, "app", articles)
         logger.LogError(err)
     }
 }
