@@ -38,9 +38,10 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
             fmt.Fprintf(w, "500 internal error")
         }
     } else {
-        tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{"RouteName2URL":route.Name2URL, "Uint64ToString":types.Uint64ToString,}).ParseFiles("static/show.gohtml")
         logger.LogError(err)
-        err = tmpl.Execute(w, article)
+        files := []string{"./static/show.gohtml", "./static/app.gohtml", "./static/sidebar.gohtml"}
+        tmpl, err := template.New("show.gohtml").Funcs(template.FuncMap{"RouteName2URL":route.Name2URL, "Uint64ToString":types.Uint64ToString,}).ParseFiles(files...)
+        err = tmpl.ExecuteTemplate(w, "app", article)
         logger.LogError(err)
     }
 }
