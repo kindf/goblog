@@ -16,14 +16,6 @@ import (
 type ArticlesController struct {
 }
 
-type ArticlesFormData struct {
-    Title       string
-    Body        string
-    URL         string
-    Article     article.Article
-    Errors      map[string]string
-}
-
 func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
     id := route.GetRouteVariable("id", r)
     article, err := article.Get(id)
@@ -54,7 +46,7 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
     }
 }
 func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
-    view.Render(w, ArticlesFormData{}, "create", "_form_field")
+    view.Render(w, view.D{}, "create", "_form_field")
 }
 
 func validateArticleFormData(title string, body string) map[string]string {
@@ -93,10 +85,10 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
             fmt.Fprintf(w, "创建文章失败，请联系管理员")
         }
     } else {
-        view.Render(w, ArticlesFormData{
-            Title: title,
-            Body: body,
-            Errors: errors,
+        view.Render(w, view.D{
+            "Title": title,
+            "Body": body,
+            "Errors": errors,
         }, "create")
     }
 }
@@ -116,11 +108,11 @@ func (*ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
             fmt.Fprintf(w, "500 internal error")
         }
     } else {
-        view.Render(w, ArticlesFormData{
-            Title: _article.Title,
-            Body: _article.Body,
-            Article: _article,
-            Errors: nil,
+        view.Render(w, view.D{
+            "Title": _article.Title,
+            "Body": _article.Body,
+            "Article": _article,
+            "Errors": nil,
         }, "edit", "_form_field")
     }
 }
