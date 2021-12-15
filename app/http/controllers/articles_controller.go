@@ -5,6 +5,7 @@ import (
     "fmt"
     "unicode/utf8"
     "strconv" // 字符串和其他类型转换
+    "time"
     //"path/filepath"
     "gorm.io/gorm"
     "goblog/pkg/route"
@@ -77,6 +78,8 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
             Title: title,
             Body: body,
         }
+        _article.CreateAt = time.Now()
+        _article.UpdateAt = time.Now()
         _article.Create()
         if _article.ID > 0 {
             fmt.Fprintf(w, "插入成功, ID为"+strconv.FormatUint(_article.ID, 10))
