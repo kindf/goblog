@@ -92,7 +92,7 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
             "Title": title,
             "Body": body,
             "Errors": errors,
-        }, "create")
+        }, "create", "_form_field")
     }
 }
 
@@ -137,6 +137,7 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
         body := r.PostFormValue("body")
 
         errors := validateArticleFormData(title, body)
+        fmt.Println("Update errors:", errors)
         if len(errors) == 0 {
             _article.Title = title
             _article.Body = body
@@ -155,7 +156,12 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
                 fmt.Fprint(w, "您没有做任何更改！")
             }
         } else {
-            view.Render(w, _article, "show")
+            view.Render(w, view.D{
+                "Title": title,
+                "Body": body,
+                "Article": _article,
+                "Errors": errors,
+            }, "edit")
         }
     }
 }

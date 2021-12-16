@@ -19,7 +19,7 @@ func RenderSimple(w io.Writer, data interface{}, tplFiles ...string) {
 
 func RenderTemplate(w io.Writer, name string, data interface{}, tplFiles ...string) {
     viewDir := "./static/"
-    files := []string{"./static/app.gohtml", "./static/sidebar.gohtml", "./static/simple.gohtml"}
+    files := []string{"./static/app.gohtml", "./static/sidebar.gohtml", "./static/simple.gohtml", "./static/_form_error_feedback.gohtml", "./static/_form_field.gohtml"}
     for _, f := range tplFiles {
         files = append(files, viewDir+f+".gohtml")
     }

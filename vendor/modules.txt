@@ -9,6 +9,9 @@ github.com/jinzhu/inflection
 # github.com/jinzhu/now v1.1.4
 ## explicit
 github.com/jinzhu/now
+# github.com/thedevsaddam/govalidator v1.9.10
+## explicit
+github.com/thedevsaddam/govalidator
 # gorm.io/driver/mysql v1.2.1
 ## explicit
 gorm.io/driver/mysql
