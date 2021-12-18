@@ -56,6 +56,6 @@ func Logout() {
     session.Forget("uid")
 }
 
-func check() bool {
+func Check() bool {
     return len(_getUID()) > 0
 }
