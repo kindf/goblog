@@ -46,7 +46,7 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(w, "500 服务器内部错误")
     } else {
         view.Render(w, view.D{
-            "Article": articles,
+            "Articles": articles,
         }, "index")
     }
 }

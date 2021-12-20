@@ -3,6 +3,7 @@ package controllers
 import (
     "goblog/pkg/view"
     "goblog/pkg/auth"
+    "goblog/pkg/flash"
     "goblog/app/models/user"
     "goblog/app/requests"
     "net/http"
@@ -37,7 +38,9 @@ func (*AuthController) DoRegister(w http.ResponseWriter, r *http.Request){
         _user.UpdateAt = time.Now()
         _user.Create()
         if _user.ID > 0 {
-            fmt.Fprint(w, "插入成功，ID为"+_user.GetStringID())
+            flash.Success("恭喜注册成功!")
+            auth.Login(_user)
+            http.Redirect(w, r, "/", http.StatusFound)
         } else {
             w.WriteHeader(http.StatusInternalServerError)
             fmt.Fprint(w, "创建用户失败，请联系管理员")
@@ -55,6 +58,7 @@ func (*AuthController) DoLogin(w http.ResponseWriter, r *http.Request){
     password := r.PostFormValue("password")
 
     if err := auth.Attempt(email, password); err == nil {
+        flash.Success("欢迎回来!")
         http.Redirect(w, r, "/", http.StatusFound)
     }else {
         view.RenderSimple(w, view.D{
@@ -67,6 +71,7 @@ func (*AuthController) DoLogin(w http.ResponseWriter, r *http.Request){
 
 func (*AuthController) Logout(w http.ResponseWriter, r *http.Request) {
     auth.Logout()
+    flash.Success("您已退出登录")
     http.Redirect(w, r, "/", http.StatusFound)
 }
 

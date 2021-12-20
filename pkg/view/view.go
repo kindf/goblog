@@ -6,6 +6,7 @@ import (
     "goblog/pkg/logger"
     "goblog/pkg/route"
     "goblog/pkg/auth"
+    "goblog/pkg/flash"
 )
 
 type D map[string]interface{}
@@ -20,6 +21,8 @@ func RenderSimple(w io.Writer, data D, tplFiles ...string) {
 
 func RenderTemplate(w io.Writer, name string, data D, tplFiles ...string) {
     data["isLogined"] = auth.Check()
+    data["loginUser"] = auth.User
+    data["flash"] = flash.All()
 
     allFiles := getTemplateFiles(tplFiles...)
 
@@ -31,7 +34,7 @@ func RenderTemplate(w io.Writer, name string, data D, tplFiles ...string) {
 
 func getTemplateFiles(tplFiles ...string) []string {
     viewDir := "./static/"
-    files := []string{"./static/app.gohtml", "./static/sidebar.gohtml", "./static/simple.gohtml", "./static/_form_error_feedback.gohtml", "./static/_form_field.gohtml"}
+    files := []string{"./static/app.gohtml", "./static/sidebar.gohtml", "./static/simple.gohtml", "./static/_form_error_feedback.gohtml", "./static/_form_field.gohtml", "./static/_messages.gohtml"}
     for _, f := range tplFiles {
         files = append(files, viewDir+f+".gohtml")
     }
