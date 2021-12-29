@@ -16,3 +16,7 @@ type User struct {
 func (user *User) ComparePassword(password string) bool {
     return user.Password == password
 }
+
+func (user *User) Link() string {
+    return ""
+}

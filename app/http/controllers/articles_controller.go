@@ -32,7 +32,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
     } else {
         view.Render(w, view.D{
             "Article": article,
-        }, "show")
+        }, "show", "_article_meta")
     }
 }
 
@@ -46,7 +46,7 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
     } else {
         view.Render(w, view.D{
             "Articles": articles,
-        }, "index")
+        }, "index", "_article_meta")
     }
 }
 func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
