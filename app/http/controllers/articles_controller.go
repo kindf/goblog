@@ -23,11 +23,11 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         if err == gorm.ErrRecordNotFound {
             w.WriteHeader(http.StatusNotFound)
-            fmt.Fprintf(w, "404 article not found")
+            fmt.Fprint(w, "404 文章未找到")
         } else {
             logger.LogError(err)
             w.WriteHeader(http.StatusInternalServerError)
-            fmt.Fprintf(w, "500 internal error")
+            fmt.Fprintf(w, "500 服务器内部错误")
         }
     } else {
         view.Render(w, view.D{
@@ -85,11 +85,11 @@ func (*ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         if err == gorm.ErrRecordNotFound {
             w.WriteHeader(http.StatusNotFound)
-            fmt.Fprintf(w, "404 article not found")
+            fmt.Fprint(w, "404 文章未找到")
         } else {
             logger.LogError(err)
             w.WriteHeader(http.StatusInternalServerError)
-            fmt.Fprintf(w, "500 internal error")
+            fmt.Fprint(w, "500 服务器内部错误")
         }
     } else {
         view.Render(w, view.D{
