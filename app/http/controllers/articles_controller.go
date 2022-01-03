@@ -7,6 +7,7 @@ import (
     // "path/filepath"
     // "gorm.io/gorm"
     "goblog/pkg/route"
+    "goblog/pkg/auth"
     "goblog/app/models/article"
     "goblog/pkg/logger"
     "goblog/pkg/view"
@@ -48,10 +49,12 @@ func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
     view.Render(w, view.D{}, "create", "_form_field")
 }
 
-func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
+func (ac *ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
+    currentUser := auth.User()
     _article := article.Article{
         Title: r.PostFormValue("title"),
         Body: r.PostFormValue("body"),
+        UserID: currentUser.ID,
     }
     errors := requests.ValidateArticleForm(_article)
     if len(errors) == 0 {
